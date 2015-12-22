@@ -78,7 +78,6 @@ extension TypedTableViewDataSource {
     
     func insertContentsOf(contentsOf newElements: [T], atIndexPath indexPath: NSIndexPath) {
         objects.insertContentsOf(newElements, at: indexPath.row)
-        print(objects)
         var indexPaths = [NSIndexPath]()
         for (index, _) in newElements.enumerate() {
             indexPaths.append(NSIndexPath(forRow: indexPath.row + index, inSection: 0))
@@ -94,11 +93,5 @@ extension TypedTableViewDataSource {
             objects[indexPath.row] = newValue
             tableView?.reloadRowsAtIndexPaths([indexPath], withRowAnimation: tableViewRowAnimation)
         }
-    }
-}
-
-extension Array {
-    func mapWithIndex<T> (f: (Int, Element) -> T) -> [T] {
-        return zip((self.startIndex ..< self.endIndex), self).map(f)
     }
 }
