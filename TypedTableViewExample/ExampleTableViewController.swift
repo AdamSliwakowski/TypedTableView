@@ -11,12 +11,29 @@ import UIKit
 class ExampleTableViewController: UIViewController {
 
     @IBOutlet weak var tableView: UITableView!
-    lazy var dataSource = TypedTableViewDataSource<Int, ExampleTableViewCell>(objects: [Int](0...100))
+    var dataSource: TypedTableViewDataSource<Int, ExampleTableViewCell>!
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        tableView.dataSource = dataSource
-        tableView.reloadData()
+        configureTableView()
+    }
+    
+    private func configureTableView() {
+        dataSource = TypedTableViewDataSource<Int, ExampleTableViewCell>(objects: [Int](0...100), tableView: tableView)
+        tableView.delegate = self
+    }
+}
+
+extension ExampleTableViewController: UITableViewDelegate {
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        tableView.deselectRowAtIndexPath(indexPath, animated: true)
+        dataSource.removeAtIndexPath(indexPath)
+//        dataSource[indexPath] = 100
+//        dataSource.removeLast()
+//        dataSource.removeFirst()
+//        dataSource.append(100)
+//        dataSource.insert(100, atIndexPath: indexPath)
+        dataSource.insertContentsOf(contentsOf: [100, 101, 102], atIndexPath: indexPath)
     }
 }
 
