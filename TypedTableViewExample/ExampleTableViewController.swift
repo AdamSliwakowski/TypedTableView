@@ -27,13 +27,14 @@ class ExampleTableViewController: UIViewController {
 extension ExampleTableViewController: UITableViewDelegate {
     func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
         tableView.deselectRowAtIndexPath(indexPath, animated: true)
-        dataSource.removeAtIndexPath(indexPath)
+        dataSource.reloadWithAnimation([1,2,3])
+//        dataSource.removeAtIndexPath(indexPath)
 //        dataSource[indexPath] = 100
 //        dataSource.removeLast()
 //        dataSource.removeFirst()
 //        dataSource.append(100)
 //        dataSource.insert(100, atIndexPath: indexPath)
-        dataSource.insertContentsOf(contentsOf: [100, 101, 102], atIndexPath: indexPath)
+//        dataSource.insertContentsOf(contentsOf: [100, 101, 102], atIndexPath: indexPath)
     }
 }
 

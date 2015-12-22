@@ -19,26 +19,35 @@ class TypedTableViewDataSource<T, K where K: UITableViewCell, K: TypedTableViewC
     var tableViewRowAnimation: UITableViewRowAnimation = .Automatic
     
     weak var tableView: UITableView?
-    var objects: [T]
+    var objects = [T]()
     
     init(objects: [T], tableView: UITableView? = nil) {
-        self.objects = objects
-        self.tableView = tableView
         super.init()
+        reload(objects)
         configureTableView(tableView)
     }
     
     private func configureTableView(tableView: UITableView?) {
+        self.tableView = tableView
         tableView?.dataSource = self
+    }
+    
+    func reload(objects: [T]) {
+        self.objects = objects
         tableView?.reloadData()
     }
     
+    func reloadWithAnimation(objects: [T]) {
+        removeAll()
+        insertContentsOf(contentsOf: objects, atIndexPath: NSIndexPath(forRow: 0, inSection: 0))
+    }
+     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return objects.count
     }
     
     func numberOfSectionsInTableView(tableView: UITableView) -> Int {
-        return objects.count > 0 ? 1 : 0
+        return 1
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -69,6 +78,12 @@ extension TypedTableViewDataSource {
     func removeLast() {
         objects.removeLast()
         tableView?.deleteRowsAtIndexPaths([NSIndexPath(forRow: objects.endIndex, inSection: 0)], withRowAnimation: tableViewRowAnimation)
+    }
+    
+    func removeAll() {
+        let indexPaths = [Int](0..<objects.count).map { NSIndexPath(forRow: $0, inSection: 0) }
+        objects.removeAll()
+        tableView?.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
     }
     
     func insert(newElement: T, atIndexPath indexPath: NSIndexPath) {
