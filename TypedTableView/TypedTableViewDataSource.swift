@@ -13,6 +13,12 @@ protocol TypedTableViewConfigurableCell {
     func configure(data: T)
 }
 
+private enum TypedTableViewDataSourceChange {
+    case Insert
+    case Update
+    case Delete
+}
+
 class TypedTableViewDataSource<T, K where K: UITableViewCell, K: TypedTableViewConfigurableCell>: NSObject, UITableViewDataSource {
     
     var tableViewRowAnimation: UITableViewRowAnimation = .Automatic
@@ -29,16 +35,6 @@ class TypedTableViewDataSource<T, K where K: UITableViewCell, K: TypedTableViewC
     private func configureTableView(tableView: UITableView?) {
         self.tableView = tableView
         tableView?.dataSource = self
-    }
-    
-    func reload(objects: [T]) {
-        self.objects = objects
-        tableView?.reloadData()
-    }
-    
-    func reloadWithAnimation(objects: [T]) {
-        removeAll()
-        insertContentsOf(contentsOf: objects, atIndexPath: NSIndexPath(forRow: 0, inSection: 0))
     }
      
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -58,36 +54,47 @@ class TypedTableViewDataSource<T, K where K: UITableViewCell, K: TypedTableViewC
 }
 
 extension TypedTableViewDataSource {
+    func reload(objects: [T]) {
+        self.objects = objects
+        tableView?.reloadData()
+    }
     
+    func reloadWithAnimation(objects: [T]) {
+        removeAll()
+        insertContentsOf(contentsOf: objects, atIndexPath: NSIndexPath(forRow: 0, inSection: 0))
+    }
+}
+
+extension TypedTableViewDataSource {
     func append(newElement: T) {
         objects.append(newElement)
-        tableView?.insertRowsAtIndexPaths([NSIndexPath(forRow: objects.endIndex, inSection: 0)], withRowAnimation: tableViewRowAnimation)
+        performChange(.Insert, index: objects.endIndex)
     }
     
     func removeAtIndexPath(indexPath: NSIndexPath) {
         objects.removeAtIndex(indexPath.row)
-        tableView?.deleteRowsAtIndexPaths([indexPath], withRowAnimation: tableViewRowAnimation)
+        performChange(.Delete, index: indexPath.row)
     }
     
     func removeFirst() {
         objects.removeFirst()
-        tableView?.deleteRowsAtIndexPaths([NSIndexPath(forRow: objects.startIndex, inSection: 0)], withRowAnimation: tableViewRowAnimation)
+        performChange(.Delete, index: objects.startIndex)
     }
     
     func removeLast() {
         objects.removeLast()
-        tableView?.deleteRowsAtIndexPaths([NSIndexPath(forRow: objects.endIndex, inSection: 0)], withRowAnimation: tableViewRowAnimation)
+        performChange(.Delete, index: objects.endIndex)
     }
     
     func removeAll() {
         let indexPaths = [Int](0..<objects.count).map { NSIndexPath(forRow: $0, inSection: 0) }
         objects.removeAll()
-        tableView?.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
+        performChange(.Delete, indexPaths: indexPaths)
     }
     
     func insert(newElement: T, atIndexPath indexPath: NSIndexPath) {
         objects.insert(newElement, atIndex: indexPath.row)
-        tableView?.insertRowsAtIndexPaths([indexPath], withRowAnimation: tableViewRowAnimation)
+        performChange(.Insert, index: indexPath.row)
     }
     
     func insertContentsOf(contentsOf newElements: [T], atIndexPath indexPath: NSIndexPath) {
@@ -96,7 +103,7 @@ extension TypedTableViewDataSource {
         for (index, _) in newElements.enumerate() {
             indexPaths.append(NSIndexPath(forRow: indexPath.row + index, inSection: 0))
         }
-        tableView?.insertRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
+        performChange(.Insert, indexPaths: indexPaths)
     }
     
     subscript(indexPath: NSIndexPath) -> T {
@@ -109,3 +116,19 @@ extension TypedTableViewDataSource {
         }
     }
 }
+
+extension TypedTableViewDataSource {
+    private func performChange(type: TypedTableViewDataSourceChange, indexPaths: [NSIndexPath]) {
+        switch type {
+        case .Insert: tableView?.insertRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
+        case .Update: tableView?.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
+        case .Delete: tableView?.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
+        }
+    }
+    
+    private func performChange(type: TypedTableViewDataSourceChange, index: Int) {
+        performChange(type, indexPaths: [NSIndexPath(forRow: index, inSection: 0)])
+    }
+}
+
+
