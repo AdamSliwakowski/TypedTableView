@@ -10,7 +10,6 @@ import UIKit
 
 protocol TypedTableViewConfigurableCell {
     typealias T
-    static var identifier: String { get set }
     func configure(data: T)
 }
 
@@ -52,7 +51,7 @@ class TypedTableViewDataSource<T, K where K: UITableViewCell, K: TypedTableViewC
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
         guard let object = self[indexPath] as? K.T else { return K() }
-        let cell = tableView.dequeueReusableCellWithIdentifier(K.identifier, forIndexPath: indexPath) as! K
+        let cell = tableView.dequeueReusableCellWithIdentifier("\(K.self)", forIndexPath: indexPath) as! K
         cell.configure(object)
         return cell
     }

@@ -11,7 +11,6 @@ import UIKit
 class ExampleTableViewCell: UITableViewCell, TypedTableViewConfigurableCell {
     
     typealias T = Int
-    static var identifier = "ExampleCell"
     
     func configure(data: T) {
         self.textLabel!.text = String(data)
