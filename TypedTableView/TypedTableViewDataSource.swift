@@ -17,11 +17,17 @@ private enum TypedTableViewDataSourceChange {
     case Insert
     case Update
     case Delete
+    
+    var tableViewRowAnimation: UITableViewRowAnimation {
+        switch self {
+        case .Insert: return .Automatic
+        case .Update: return .Fade
+        case .Delete: return .Bottom
+        }
+    }
 }
 
 class TypedTableViewDataSource<T, K where K: UITableViewCell, K: TypedTableViewConfigurableCell>: NSObject, UITableViewDataSource {
-    
-    var tableViewRowAnimation: UITableViewRowAnimation = .Automatic
     
     weak var tableView: UITableView?
     var objects = [T]()
@@ -112,7 +118,7 @@ extension TypedTableViewDataSource {
         }
         set(newValue) {
             objects[indexPath.row] = newValue
-            tableView?.reloadRowsAtIndexPaths([indexPath], withRowAnimation: tableViewRowAnimation)
+            performChange(.Update, index: indexPath.row)
         }
     }
 }
@@ -120,9 +126,9 @@ extension TypedTableViewDataSource {
 extension TypedTableViewDataSource {
     private func performChange(type: TypedTableViewDataSourceChange, indexPaths: [NSIndexPath]) {
         switch type {
-        case .Insert: tableView?.insertRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
-        case .Update: tableView?.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
-        case .Delete: tableView?.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: tableViewRowAnimation)
+        case .Insert: tableView?.insertRowsAtIndexPaths(indexPaths, withRowAnimation: type.tableViewRowAnimation)
+        case .Update: tableView?.reloadRowsAtIndexPaths(indexPaths, withRowAnimation: type.tableViewRowAnimation)
+        case .Delete: tableView?.deleteRowsAtIndexPaths(indexPaths, withRowAnimation: type.tableViewRowAnimation)
         }
     }
     
