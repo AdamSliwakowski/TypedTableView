@@ -13,6 +13,14 @@ class ExampleTableViewCell: UITableViewCell, TypedTableViewConfigurableCell {
     typealias T = Int
     
     func configure(data: T) {
-        self.textLabel!.text = String(data)
+        configureText(data)
+        backgroundColor = UIColor(hue: CGFloat(0.01 * Double(data)), saturation: 0.8, brightness: 1, alpha: 1)
+    }
+    
+    func configureText(data: T) {
+        textLabel!.text = "Cell number: " + String(data)
+        textLabel!.textColor = .whiteColor()
+        textLabel!.font = .boldSystemFontOfSize(17.0)
+        textLabel!.textAlignment = .Center
     }
 }
